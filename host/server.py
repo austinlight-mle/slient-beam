@@ -11,8 +11,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 # Pre-shared client credentials (in practice, load this from secure storage)
 AUTHORIZED_CLIENTS = {
-    'client1': 'secrettoken1',
-    'client2': 'secrettoken2',
+    'adrian': 'PZyB6csWiNsPRrfB8ATUMKGMfCW',
 }
 
 # Dictionary to log last heartbeat per client

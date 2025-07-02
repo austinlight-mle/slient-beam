@@ -2,6 +2,9 @@
 
 import mss, io
 from PIL import Image
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def capture_screenshots(max_monitors=2):
     """
@@ -19,7 +22,7 @@ def capture_screenshots(max_monitors=2):
             img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
             # Save to WebP in-memory
             buf = io.BytesIO()
-            img.save(buf, format='WEBP', quality=80)  # quality=80 (adjust as needed)
+            img.save(buf, format='WEBP', quality=50)
             webp_data = buf.getvalue()
             screenshots.append((idx, webp_data))
     return screenshots
