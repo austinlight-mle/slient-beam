@@ -2,9 +2,6 @@
 
 import mss, io
 from PIL import Image
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 def capture_screenshots(max_monitors=2):
