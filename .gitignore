@@ -50,6 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+cache/
 
 # Translations
 *.mo
@@ -126,6 +127,8 @@ celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
+*.zip
+*.webp
 
 # Environments
 .env
@@ -145,6 +148,7 @@ venv.bak/
 
 # mkdocs documentation
 /site
+received/
 
 # mypy
 .mypy_cache/
