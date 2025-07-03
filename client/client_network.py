@@ -2,19 +2,24 @@
 
 import requests
 from requests.auth import HTTPBasicAuth
+import getpass
 
-def send_screenshot(host_url, client_id, auth_token, monitor_num, image_bytes):
+username = getpass.getuser()
+
+
+def send_screenshot(host_url, monitor_num, image_bytes):
     """
     Send one screenshot to the server via HTTPS POST.
     Returns True on success (status 200), False otherwise.
     """
-    url = f"https://{host_url}/upload"
+    url = f"http://{host_url}/{username}/upload"
+    print(url)
     try:
-        files = {'screenshot': (f'monitor{monitor_num}.webp', image_bytes, 'image/webp')}
-        # Use HTTP Basic Auth with client_id and token
-        auth = HTTPBasicAuth(client_id, auth_token)
-        # Note: verify should use a proper CA cert or False if using self-signed
-        resp = requests.post(url, files=files, auth=auth, verify=False, timeout=10)
+        files = {
+            "screenshot": (f"monitor{monitor_num}.webp", image_bytes, "image/webp"),
+        }
+        resp = requests.post(url, files=files, timeout=10)
+        print(resp.status_code)
         return resp.status_code == 200
     except requests.RequestException:
         return False

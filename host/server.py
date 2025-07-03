@@ -8,26 +8,11 @@ from datetime import datetime
 app = Flask(__name__)
 DATA_DIR = "received"  # base directory for storing screenshots
 os.makedirs(DATA_DIR, exist_ok=True)
-
-# Pre-shared client credentials (in practice, load this from secure storage)
-AUTHORIZED_CLIENTS = {
-    "adrian": "PZyB6csWiNsPRrfB8ATUMKGMfCW",
-}
-
-# Dictionary to log last heartbeat per client
 client_status = {}
 
 
-@app.route("/upload", methods=["POST"])
-def upload():
-    auth = request.authorization
-    if (
-        not auth
-        or auth.username not in AUTHORIZED_CLIENTS
-        or AUTHORIZED_CLIENTS[auth.username] != auth.password
-    ):
-        abort(401)
-    client_id = auth.username
+@app.route("/<client_id>/upload", methods=["POST"])
+def upload(client_id: str):
     # Ensure client-specific folder exists
     client_folder = os.path.join(DATA_DIR, client_id)
     os.makedirs(client_folder, exist_ok=True)
@@ -44,17 +29,14 @@ def upload():
 
 
 def run_server():
-    # SSL context: use your cert.pem and key.pem (self-signed OK for internal use)
-    context = ("cert.pem", "key.pem")
-    app.run(host="0.0.0.0", port=443, ssl_context=context, threaded=True, debug=False)
+    app.run(host="0.0.0.0", port=8081, threaded=True, debug=False)
 
 
 if __name__ == "__main__":
-    # Start the Flask server in a background thread
     server_thread = Thread(target=run_server, daemon=True)
     server_thread.start()
     print(
-        "Server running on HTTPS port 443. Enter 'list' to view clients, 'exit' to quit."
+        "Server running on HTTPS port 8081. Enter 'list' to view clients, 'exit' to quit."
     )
 
     # CLI admin interface

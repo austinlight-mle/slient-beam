@@ -40,9 +40,9 @@ def main():
         # Capture new screenshots
         shots = capture_screenshots(max_monitors=2)
         for mon, img_bytes in shots:
-            # success = send_screenshot(host, client_id, auth_token, mon, img_bytes)
+            success = send_screenshot(host, mon, img_bytes)
             # if not success:
-            cache_screenshot(mon, img_bytes)
+            # cache_screenshot(mon, img_bytes)
         time.sleep(interval)
 
 
