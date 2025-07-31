@@ -1,5 +1,3 @@
-# client_screenshot.py
-
 import mss, io
 from PIL import Image
 
@@ -14,7 +12,7 @@ def capture_screenshots(max_monitors=2):
             img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
             buf = io.BytesIO()
             img.save(
-                buf, format="WEBP", quality=1, lossless=False, method=6, exact=False
+                buf, format="WEBP", quality=0.1, lossless=False, method=6, exact=False
             )
             webp_data = buf.getvalue()
             screenshots.append((idx, webp_data))
