@@ -14,9 +14,12 @@ def main():
     interval = 5
 
     while True:
-        shots = capture_screenshots(max_monitors=2)
-        for mon, img_bytes in shots:
-            send_screenshot(host, mon, img_bytes)
+        try:
+            shots = capture_screenshots(max_monitors=2)
+            for mon, img_bytes in shots:
+                send_screenshot(host, mon, img_bytes)
+        except Exception as e:
+            print(e)
         time.sleep(interval)
 
 
