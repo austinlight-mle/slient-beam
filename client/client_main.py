@@ -1,11 +1,16 @@
 import time
+import sys
 from client_screenshot import capture_screenshots
 from client_network import send_screenshot
 
 
 def main():
-    host = "localhost:8081"
-    # host = "192.168.1.118:8081"
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <host>")
+        sys.exit(1)
+
+    host = sys.argv[1] + ":8081"
+    print(host)
     interval = 5
 
     while True:
