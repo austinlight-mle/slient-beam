@@ -10,17 +10,17 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 @app.route("/<client_id>/<monitor_num>/upload", methods=["POST"])
 def upload(client_id: str, monitor_num: str):
-    # Ensure client-specific folder exists
-    client_folder = os.path.join(DATA_DIR, client_id)
-    os.makedirs(client_folder, exist_ok=True)
-    monitor_folder = os.path.join(client_folder, monitor_num)
+    # Create directory structure: received/<client_id>/<YYYYMMDD>/<monitor_num>/
+    date_str = datetime.now().strftime("%Y%m%d")
+    day_folder = os.path.join(DATA_DIR, client_id, date_str)
+    monitor_folder = os.path.join(day_folder, monitor_num)
     os.makedirs(monitor_folder, exist_ok=True)
     # Handle one or multiple files
     for file_key in request.files:
         f = request.files[file_key]
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
         filename = f"{timestamp}_{file_key}.webp"
-        filepath = os.path.join(client_folder, monitor_num, filename)
+        filepath = os.path.join(monitor_folder, filename)
         f.save(filepath)
     return "OK", 200
 

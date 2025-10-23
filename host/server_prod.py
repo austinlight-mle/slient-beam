@@ -15,14 +15,16 @@ logger = logging.getLogger(__name__)
 
 @app.route("/<client_id>/<monitor_num>/upload", methods=["POST"])
 def upload(client_id: str, monitor_num: str):
-    client_folder = os.path.join(DATA_DIR, client_id, monitor_num)
-    os.makedirs(client_folder, exist_ok=True)
+    # Create directory structure: received/<client_id>/<YYYYMMDD>/<monitor_num>/
+    date_str = datetime.now().strftime("%Y%m%d")
+    monitor_folder = os.path.join(DATA_DIR, client_id, date_str, monitor_num)
+    os.makedirs(monitor_folder, exist_ok=True)
 
     for file_key in request.files:
         f = request.files[file_key]
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
         filename = f"{timestamp}_{file_key}.webp"
-        filepath = os.path.join(client_folder, filename)
+        filepath = os.path.join(monitor_folder, filename)
         f.save(filepath)
         logger.info(f"Saved {filepath}")
 
