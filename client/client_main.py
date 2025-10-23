@@ -13,7 +13,7 @@ TASK_NAME = "SilentBeamClient"
 def prompt_for_server_ip():
     root = tk.Tk()
     root.withdraw()
-    ip = simpledialog.askstring("Silent Beam", "Enter server IP or hostname:")
+    ip = simpledialog.askstring("SilentBeamClient", "Enter server IP or hostname:")
     root.destroy()
     if ip:
         return ip.strip()
@@ -54,11 +54,11 @@ def main():
         if ok:
             start_task_now()
             root = tk.Tk(); root.withdraw()
-            messagebox.showinfo("Silent Beam", "Background task installed and started.\nIt will auto-run at logon.")
+            messagebox.showinfo("SilentBeamClient", "Background task installed and started.\nIt will auto-run at logon.")
             root.destroy()
         else:
             root = tk.Tk(); root.withdraw()
-            messagebox.showerror("Silent Beam", f"Failed to create task.\n\n{out}")
+            messagebox.showerror("SilentBeamClient", f"Failed to create task.\n\n{out}")
             root.destroy()
         return
 
