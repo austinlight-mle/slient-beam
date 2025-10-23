@@ -75,16 +75,24 @@ def _launch_gui():
     frame = ttk.Frame(root)
     frame.pack(fill="both", expand=True, padx=8, pady=8)
 
-    cols = ("status", "client", "monitor", "last_seen", "uploads")
+    # Bigger row height and emoji-capable font for larger colored circles
+    style = ttk.Style(root)
+    try:
+        style.configure("Treeview", rowheight=32, font=("Segoe UI Emoji", 14))
+        style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"))
+    except Exception:
+        style.configure("Treeview", rowheight=32)
+
+    cols = ("status", "client", "monitors", "last_seen", "uploads")
     tree = ttk.Treeview(frame, columns=cols, show="headings", height=12)
     tree.heading("status", text="Status")
     tree.heading("client", text="Client")
-    tree.heading("monitor", text="Monitor")
+    tree.heading("monitors", text="Monitors")
     tree.heading("last_seen", text="Last Seen")
     tree.heading("uploads", text="Uploads")
-    tree.column("status", width=70, anchor="center")
+    tree.column("status", width=80, anchor="center")
     tree.column("client", width=260)
-    tree.column("monitor", width=90, anchor="center")
+    tree.column("monitors", width=220, anchor="center")
     tree.column("last_seen", width=120, anchor="center")
     tree.column("uploads", width=90, anchor="center")
     tree.tag_configure("green", foreground="green")
@@ -102,28 +110,41 @@ def _launch_gui():
                 cid: {"monitors": {mk: me.copy() for mk, me in c.get("monitors", {}).items()}}
                 for cid, c in _clients.items()
             }
-        # One row per (client, monitor)
+        # One row per client; aggregate monitor statuses as emojis
         for cid, data in snapshot.items():
-            for mk, me in data["monitors"].items():
-                status = "green" if now - me.get("last_seen", 0) <= STALE_SEC else "red"
-                # Update stored status and log transitions
+            monitors = data.get("monitors", {})
+            mon_parts = []
+            overall_green = False
+            latest_seen = 0.0
+            total_uploads = 0
+            # Sort monitors numerically when possible
+            for mk, me in sorted(monitors.items(), key=lambda kv: int(kv[0]) if str(kv[0]).isdigit() else str(kv[0])):
+                is_green = (now - me.get("last_seen", 0)) <= STALE_SEC
+                emoji = "\U0001F7E2" if is_green else "\U0001F534"  # 🟢 / 🔴
+                mon_parts.append(f"{mk}:{emoji}")
+                overall_green = overall_green or is_green
+                latest_seen = max(latest_seen, me.get("last_seen", 0))
+                total_uploads += int(me.get("uploads", 0))
+                # Update stored status and log transitions per monitor
                 with _clients_lock:
                     current = _clients.get(cid, {}).get("monitors", {}).get(mk, {}).get("status")
-                    if current != status:
-                        _clients[cid]["monitors"][mk]["status"] = status
-                        _log(f"{cid} monitor {mk} status -> {status.upper()}")
-                row_id = f"{cid}:{mk}"
-                vals = (
-                    "●",
-                    cid,
-                    mk,
-                    _format_age(me.get("last_seen", 0)),
-                    me.get("uploads", 0),
-                )
-                if tree.exists(row_id):
-                    tree.item(row_id, values=vals, tags=(status,))
-                else:
-                    tree.insert("", "end", iid=row_id, values=vals, tags=(status,))
+                    desired = "green" if is_green else "red"
+                    if current != desired:
+                        _clients[cid]["monitors"][mk]["status"] = desired
+                        _log(f"{cid} monitor {mk} status -> {desired.upper()}")
+            overall_status = "green" if overall_green else "red"
+            status_emoji = "\U0001F7E2" if overall_green else "\U0001F534"
+            vals = (
+                status_emoji,
+                cid,
+                " ".join(mon_parts) if mon_parts else "-",
+                _format_age(latest_seen) if latest_seen else "-",
+                total_uploads,
+            )
+            if tree.exists(cid):
+                tree.item(cid, values=vals, tags=(overall_status,))
+            else:
+                tree.insert("", "end", iid=cid, values=vals, tags=(overall_status,))
         root.after(1000, refresh_clients)
 
     def pump_logs():
