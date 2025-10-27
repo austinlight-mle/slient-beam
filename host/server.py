@@ -1,13 +1,18 @@
 from flask import Flask, request
 from threading import Thread, Lock
-import os, time, queue
+import os, time, queue, sys
 from datetime import datetime
 import tkinter as tk
 from tkinter import ttk, scrolledtext, font as tkfont
 
 # --- Flask server setup ---
 app = Flask(__name__)
-DATA_DIR = "received"
+# Anchor data directory to script/exe folder to avoid CWD issues
+if getattr(sys, "frozen", False):  # PyInstaller exe
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "received")
 PORT = 8081
 STALE_SEC = 20  # consider client offline if no uploads within this many seconds
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -24,14 +29,15 @@ def _log(msg: str):
 @app.route("/<client_id>/<monitor_num>/upload", methods=["POST"])
 def upload(client_id: str, monitor_num: str):
     # Save to received/<client_id>/<YYYYMMDD>/<monitor_num>/
-    date_str = datetime.now().strftime("%Y%m%d")
+    now_dt = datetime.now()  # single timestamp per request to keep folder/filenames consistent
+    date_str = now_dt.strftime("%Y%m%d")
     mon_folder = os.path.join(DATA_DIR, client_id, date_str, monitor_num)
     os.makedirs(mon_folder, exist_ok=True)
 
     saved_count = 0
     for file_key in request.files:
         f = request.files[file_key]
-        ts = datetime.now().strftime("%Y%m%d%H%M%S%f")
+        ts = now_dt.strftime("%Y%m%d%H%M%S%f")
         filename = f"{ts}_{file_key}.webp"
         f.save(os.path.join(mon_folder, filename))
         saved_count += 1
