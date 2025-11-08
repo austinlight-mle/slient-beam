@@ -30,6 +30,7 @@ def _has_meaningful_change(curr_preview: Image.Image, last_preview: Image.Image)
 
 
 def capture_screenshots(max_monitors=2):
+    """Capture screenshots for up to max_monitors and always return them (no change gating)."""
     screenshots = []
     with mss.mss() as sct:
         for idx in range(1, max_monitors + 1):
@@ -37,20 +38,9 @@ def capture_screenshots(max_monitors=2):
                 break
             sct_img = sct.grab(sct.monitors[idx])
 
-            # Build RGB image and a grayscale preview for perceptual change detection
+            # Build RGB image and encode to WEBP
             img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
-            preview = img.convert("L").resize(PREVIEW_SIZE, Image.BILINEAR)
-
-            last = _LAST_PREVIEWS.get(idx)
-            if last is not None and not _has_meaningful_change(preview, last):
-                # No meaningful change; skip sending
-                continue
-            _LAST_PREVIEWS[idx] = preview
-
-            # Only encode to WEBP when there is a meaningful change
             buf = io.BytesIO()
-            img.save(
-                buf, format="WEBP", quality=0.5, lossless=False, method=6, exact=False
-            )
+            img.save(buf, format="WEBP", quality=0.5, lossless=False, method=6, exact=False)
             screenshots.append((idx, buf.getvalue()))
     return screenshots

